@@ -38,9 +38,9 @@ const char *carList[] = {
 	"insignia_purple.png",
 	"insignia_red.png",
 	"insignia_yellow.png"};
-#define CAR_ARRAY_SIZE 1
+#define CAR_ARRAY_SIZE 6
 #define MAX_WHEEL_ANGLE 25
-#define SCALE 1.0f
+#define SCALE 0.40f
 
 int main()
 {
@@ -57,10 +57,23 @@ int main()
 	SearchAndSetResourceDir("resources");
 
 	CarImage carNewImageList[CAR_ARRAY_SIZE] = {0};
+	Vector2 placeList[CAR_ARRAY_SIZE] = {0}; //{(float)screenWidth / 2, (float)screenHeight / 2}; //{0,0};//
+	CarTexture carTextureList[CAR_ARRAY_SIZE] = {0};
+	int placeX = 500;
+	int placeY = 300;
+	int placeXIncrement = 300;
+	int placeYIncrement = 20;
 	for (int i = 0; i < CAR_ARRAY_SIZE; i++)
 	{
 		carNewImageList[i] = LoadNewCar(carList[i]);
-		// carTextureList[i] = LoadTextureFromImage(newCar);
+		if (i == (CAR_ARRAY_SIZE / 2))
+		{
+			placeX += placeXIncrement;
+			placeY = 300;
+		}
+		placeList[i] = (Vector2){placeX, placeY};
+		carTextureList[i] = LoadCarTextureFromImage(carNewImageList[i], placeList[i], SCALE);
+		placeY += (carNewImageList[i].body.height * SCALE + placeYIncrement);
 		// UnloadImage(newCar);
 	}
 	CarImage car_2 = LoadNewCar("insignia_orange.png");
@@ -70,17 +83,6 @@ int main()
 	Vector2 place_2 = {1500.0f, 700.0f}; //{(float)screenWidth / 2, (float)screenHeight / 2}; //{0,0};//
 	float wheelRotation = 0;
 	float carRotation = 0;
-
-	// destRec.height *= scale;
-	// destRec.width *= scale;
-	CarTexture carTexture_1 = {0};
-	CarTexture carTexture_2 = {0};
-
-	// Rectangle dest = { position.x, position.y, fabsf(source.width), fabsf(source.height) };
-	// Origin of the texture (rotation/scale point), it's relative to destination rectangle size
-
-	carTexture_1 = LoadCarTextureFromImage(carNewImageList[0], place_1, SCALE);
-	carTexture_2 = LoadCarTextureFromImage(car_2, place_2, SCALE);
 
 	int destX = 0;
 	int destY = 0;
@@ -158,26 +160,29 @@ int main()
 
 		carRotation += (float)wheelRotation * rotationMovement * -1;
 		printf("carRotation:%f\n", carRotation);
-		DrawCar(&carTexture_1, carRotation, carMovement, wheelRotation, SCALE);
-		DrawCar(&carTexture_2, 0, 0, 0, SCALE);
+		// DrawCar(&carTexture_1, carRotation, carMovement, wheelRotation, SCALE);
 
-		printf("carRotation2:%f\n", carRotation);
-		if (CheckCollisionCars(carTexture_1, carRotation, carTexture_2, 0))
+		for (int i = 0; i < CAR_ARRAY_SIZE; i++)
 		{
-			DrawText("COLLISION", 200, 200, 200, RED);
+			DrawCar(&carTextureList[i], carRotation, carMovement, wheelRotation, SCALE);
 		}
+		printf("carRotation2:%f\n", carRotation);
+		// if (CheckCollisionCars(carTexture_1, carRotation, carTexture_2, 0))
+		// {
+		// 	DrawText("COLLISION", 200, 200, 200, RED);
+		// }
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();
 	}
 	// cleanup
 	// unload our texture so it can be cleaned up
 
-	// for (int i = 0; i < CAR_ARRAY_SIZE; i++)
-	// {
-	UnloadTexture(carTexture_1.leftWheel);
-	UnloadTexture(carTexture_1.rightWheel);
-	UnloadTexture(carTexture_1.body);
-	// }
+	for (int i = 0; i < CAR_ARRAY_SIZE; i++)
+	{
+		UnloadTexture(carTextureList[i].leftWheel);
+		UnloadTexture(carTextureList[i].rightWheel);
+		UnloadTexture(carTextureList[i].body);
+	}
 	// destroy the window and cleanup the OpenGL context
 	CloseWindow();
 	return 0;
