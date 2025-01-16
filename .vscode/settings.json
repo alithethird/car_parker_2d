@@ -11,6 +11,8 @@
 	"files.associations": {
 		"atomic": "c",
 		"*.m": "c",
-		"raylib.h": "c"
+		"raylib.h": "c",
+		"c_api.h": "c",
+		"stdlib.h": "c"
 	}
 }

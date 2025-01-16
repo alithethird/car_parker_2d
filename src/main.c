@@ -1,33 +1,14 @@
-/*
-Raylib example file.
-This is an example main file for a simple raylib project.
-Use this as a starting point or replace it with your code.
-
-For a C++ project simply rename the file to .cpp and re-run the build script
-
--- Copyright (c) 2020-2024 Jeffery Myers
---
---This software is provided "as-is", without any express or implied warranty. In no event
---will the authors be held liable for any damages arising from the use of this software.
-
---Permission is granted to anyone to use this software for any purpose, including commercial
---applications, and to alter it and redistribute it freely, subject to the following restrictions:
-
---  1. The origin of this software must not be misrepresented; you must not claim that you
---  wrote the original software. If you use this software in a product, an acknowledgment
---  in the product documentation would be appreciated but is not required.
---
---  2. Altered source versions must be plainly marked as such, and must not be misrepresented
---  as being the original software.
---
---  3. This notice may not be removed or altered from any source distribution.
-
-*/
-
 #include "raylib.h"
 #include "stdlib.h"
 #include "resource_dir.h" // utility header for SearchAndSetResourceDir
 #include "helpers.h"
+#include <stdio.h>
+
+// #include <tensorflow/c/c_api.h>
+
+#define CAR_ARRAY_SIZE 2
+#define MAX_WHEEL_ANGLE 25
+#define SCALE 0.4f
 
 const char *carList[] = {
 	"insignia_blue.png",
@@ -38,9 +19,6 @@ const char *carList[] = {
 	"insignia_purple.png",
 	"insignia_red.png",
 	"insignia_yellow.png"};
-#define CAR_ARRAY_SIZE 6
-#define MAX_WHEEL_ANGLE 25
-#define SCALE 0.40f
 
 int main()
 {
@@ -59,9 +37,9 @@ int main()
 	CarImage carNewImageList[CAR_ARRAY_SIZE] = {0};
 	Vector2 placeList[CAR_ARRAY_SIZE] = {0}; //{(float)screenWidth / 2, (float)screenHeight / 2}; //{0,0};//
 	CarTexture carTextureList[CAR_ARRAY_SIZE] = {0};
-	int placeX = 500;
-	int placeY = 300;
-	int placeXIncrement = 300;
+	int placeX = 1000;
+	int placeY = 1300;
+	int placeXIncrement = 2500;
 	int placeYIncrement = 20;
 	for (int i = 0; i < CAR_ARRAY_SIZE; i++)
 	{
@@ -87,6 +65,7 @@ int main()
 	int destX = 0;
 	int destY = 0;
 
+	// printf("Hello from TensorFlow C library version %s\n", TF_Version());
 	// game loop
 	while (!WindowShouldClose()) // run the loop untill the user presses ESCAPE or presses the Close button on the window
 	{
@@ -167,10 +146,10 @@ int main()
 			DrawCar(&carTextureList[i], carRotation, carMovement, wheelRotation, SCALE);
 		}
 		printf("carRotation2:%f\n", carRotation);
-		// if (CheckCollisionCars(carTexture_1, carRotation, carTexture_2, 0))
-		// {
-		// 	DrawText("COLLISION", 200, 200, 200, RED);
-		// }
+		if (CheckCollisionCars(carTextureList[0], carRotation, carTextureList[1], carRotation))
+		{
+			DrawText("COLLISION", 200, 200, 200, RED);
+		}
 		// end the frame and get ready for the next one  (display frame, poll input, etc...)
 		EndDrawing();
 	}

@@ -184,7 +184,7 @@ workspace (workspaceName)
             libdirs {"../bin/%{cfg.buildcfg}"}
 
         filter "system:linux"
-            links {"pthread", "m", "dl", "rt", "X11"}
+            links {"pthread", "m", "dl", "rt", "X11", "tensorflow"}
 
         filter "system:macosx"
             links {"OpenGL.framework", "Cocoa.framework", "IOKit.framework", "CoreFoundation.framework", "CoreAudio.framework", "CoreVideo.framework", "AudioToolbox.framework"}

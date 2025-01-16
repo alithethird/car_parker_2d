@@ -2,7 +2,8 @@
 #include "raylib.h"
 #include "stdlib.h"
 #include "resource_dir.h" // utility header for SearchAndSetResourceDir
-
+#include <stdio.h>
+#include "parking_sensor.h"
 // Image, pixel data stored in CPU memory (RAM)
 typedef struct CarImage
 {
@@ -185,14 +186,16 @@ bool CheckCollisionCars(CarTexture car1, float angle1, CarTexture car2, float an
 	Color color = RED;
 	Vector2 points1[5] = {0};
 	Vector2 points1_[9] = {0};
+	UltrasonicSensor sensors[8] = {0};
 	GenerateCarEdges(car1, &angle1, points1);
-	GenerateCarEdges_(car1, &angle1, points1, points1_);
+	GenerateCarEdges_(points1, points1_);
+	GenerateSensorLocations(points1, sensors);
 	// DrawLineStrip(points1, 5, color);
 	DrawLineStrip(points1_, 9, color);
 	Vector2 points2[5] = {0};
 	Vector2 points2_[9] = {0};
 	GenerateCarEdges(car2, &angle2, points2);
-	GenerateCarEdges_(car2, &angle2, points2, points2_);
+	GenerateCarEdges_(points2, points2_);
 	Vector2 collisionPoint = {0};
 	bool collided = false;
 	for (int i = 0; i < 8; i++)
@@ -209,14 +212,13 @@ bool CheckCollisionCars(CarTexture car1, float angle1, CarTexture car2, float an
 	DrawLineStrip(points2_, 9, color);
 	return collided;
 }
-
-void GenerateCarEdges_(CarTexture car, float *angle, Vector2 *oldPoints, Vector2 *points)
+void GenerateCarEdges_(Vector2 *oldPoints, Vector2 *points)
 {
 	float front_1 = 0.32f;
 	float front_2 = 0.12f;
 	float back_1 = 0.18f;
 	float back_2 = 0.2f;
-	
+
 	points[0] = GetSplinePointLinear(oldPoints[0], oldPoints[1], front_1);	
 	points[1] = GetSplinePointLinear(oldPoints[0], oldPoints[1], 1.0f - front_1);
 	points[2] = GetSplinePointLinear(oldPoints[1], oldPoints[2], front_2);
