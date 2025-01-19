@@ -7,9 +7,9 @@
 #define LIMIT_MIDDLE 0.2f
 #define LIMIT_FAR 0.3f
 
-#define FRONT_INNER_ANGLE 30.0f
+#define FRONT_INNER_ANGLE 0.0f
 #define FRONT_OUTER_ANGLE 30.0f
-#define REAR_INNER_ANGLE 30.0f
+#define REAR_INNER_ANGLE 0.0f
 #define REAR_OUTER_ANGLE 30.0f
 
 typedef struct UltrasonicSensor
@@ -22,20 +22,33 @@ typedef struct UltrasonicSensor
 
 } UltrasonicSensor;
 
-UltrasonicSensor CalculateMiddleRay(UltrasonicSensor sensor)
+Vector2 rotate_point(Vector2 o, float angleInRads, Vector2 p)
 {
-    DrawLineEx(sensor.location, sensor.middleRay, 3.0f, GREEN);
-    sensor.angle = -15;
-    sensor.middleRay.x = sensor.location.x + (sensor.middleRay.y - sensor.location.y) * sinf(sensor.angle * DEG2RAD) + fabs(sensor.middleRay.x - sensor.location.x) * cosf(sensor.angle * DEG2RAD);
-    sensor.middleRay.y = sensor.location.y + (sensor.middleRay.y - sensor.location.y) * cosf(sensor.angle * DEG2RAD) + fabs(sensor.middleRay.x - sensor.location.x) * sinf(sensor.angle * DEG2RAD);
+    float s = sinf(angleInRads);
+    float c = cosf(angleInRads);
 
+    // translate point back to origin:
+    p.x -= o.x;
+    p.y -= o.y;
 
-    char buffer[1000];
-    // sprintf(buffer, "angle:  %.2f. sin: %.2f. cos: %.2f", sensor.angle * DEG2RAD, sinf(sensor.angle * DEG2RAD), cosf(sensor.angle * DEG2RAD));
-    sprintf(buffer, "x[%.2f] + (mix_y[%.2f] - loc_y[%.2f])[%.2f] * sin[%.2f] + (mid_x[%.2f] - loc_x[%.2f])[%.2f] * cos[%.2f]",sensor.middleRay.x, sensor.middleRay.y, sensor.location.y, sensor.middleRay.y - sensor.location.y, sinf(sensor.angle * DEG2RAD), sensor.middleRay.x, sensor.location.x, -fabs(sensor.middleRay.x - sensor.location.x),cosf(sensor.angle * DEG2RAD));
-	DrawText(buffer, 000, 400, 20, WHITE);
+    // rotate point
+    float xnew = p.x * c - p.y * s;
+    float ynew = p.x * s + p.y * c;
+
+    // translate point back:
+    p.x = xnew + o.x;
+    p.y = ynew + o.y;
+
+    return p;
+}
+
+UltrasonicSensor RotateSensor(UltrasonicSensor sensor)
+{
+    float radAngle = sensor.angle * DEG2RAD;
+    sensor.middleRay = rotate_point(sensor.location, radAngle, sensor.middleRay);
     return sensor;
 }
+
 void DrawUltrasonicSensor(UltrasonicSensor sensor)
 {
     float rad = 5.0f;
@@ -98,25 +111,25 @@ void GenerateSensorLocations(Vector2 *points, UltrasonicSensor *sensors)
 
     // front
     // outer
-    sensors[0].angle = FRONT_OUTER_ANGLE;
-    sensors[3].angle = -FRONT_OUTER_ANGLE;
+    sensors[0].angle = -FRONT_OUTER_ANGLE;
+    sensors[3].angle = FRONT_OUTER_ANGLE;
     // inner
-    sensors[1].angle = FRONT_INNER_ANGLE;
-    sensors[2].angle = -FRONT_INNER_ANGLE;
+    sensors[1].angle = -FRONT_INNER_ANGLE;
+    sensors[2].angle = FRONT_INNER_ANGLE;
 
     // rear
     // outer
-    sensors[4].angle = REAR_OUTER_ANGLE;
-    sensors[7].angle = -REAR_OUTER_ANGLE;
+    sensors[4].angle = -REAR_OUTER_ANGLE;
+    sensors[7].angle = REAR_OUTER_ANGLE;
     // inner
-    sensors[5].angle = REAR_INNER_ANGLE;
-    sensors[6].angle = -REAR_INNER_ANGLE;
+    sensors[5].angle = -REAR_INNER_ANGLE;
+    sensors[6].angle = REAR_INNER_ANGLE;
     // Calculate middle Rays
-
-    sensors[3] = CalculateMiddleRay(sensors[3]);
+    
 
     for (int i = 0; i < 8; i++)
     {
+        sensors[i] = RotateSensor(sensors[i]);
         DrawUltrasonicSensor(sensors[i]);
     }
 }

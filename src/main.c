@@ -38,7 +38,7 @@ int main()
 	Vector2 placeList[CAR_ARRAY_SIZE] = {0}; //{(float)screenWidth / 2, (float)screenHeight / 2}; //{0,0};//
 	CarTexture carTextureList[CAR_ARRAY_SIZE] = {0};
 	int placeX = 1000;
-	int placeY = 1300;
+	int placeY = 300;
 	int placeXIncrement = 2500;
 	int placeYIncrement = 20;
 	for (int i = 0; i < CAR_ARRAY_SIZE; i++)
