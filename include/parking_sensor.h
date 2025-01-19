@@ -22,7 +22,7 @@ typedef struct UltrasonicSensor
 
 } UltrasonicSensor;
 
-Vector2 rotate_point(Vector2 o, float angleInRads, Vector2 p)
+Vector2 RotatePoint(Vector2 o, float angleInRads, Vector2 p)
 {
     float s = sinf(angleInRads);
     float c = cosf(angleInRads);
@@ -45,7 +45,7 @@ Vector2 rotate_point(Vector2 o, float angleInRads, Vector2 p)
 UltrasonicSensor RotateSensor(UltrasonicSensor sensor)
 {
     float radAngle = sensor.angle * DEG2RAD;
-    sensor.middleRay = rotate_point(sensor.location, radAngle, sensor.middleRay);
+    sensor.middleRay = RotatePoint(sensor.location, radAngle, sensor.middleRay);
     return sensor;
 }
 
