@@ -32,6 +32,13 @@ typedef struct CarTexture
 
 } CarTexture;
 
+typedef struct SensorStatus
+{
+	bool hit;
+	float sensorHit[8];
+} SensorStatus;
+
+
 // function to load car with wheels
 CarImage LoadNewCar(const char *carName)
 {
@@ -185,9 +192,9 @@ bool CheckCollisionCars(CarTexture car1, float angle1, CarTexture car2, float an
 	rotatedRec2.y = rotatedRec2.y - rotatedRec2.height / 2;
 	Color color = RED;
 	Vector2 points1[5] = {0};
+	GenerateCarEdges(car1, &angle1, points1);
 	Vector2 points1_[9] = {0};
 	UltrasonicSensor sensors[8] = {0};
-	GenerateCarEdges(car1, &angle1, points1);
 	GenerateCarEdges_(points1, points1_);
 	GenerateSensorLocations(points1, sensors);
 	// DrawLineStrip(points1, 5, color);
@@ -211,6 +218,54 @@ bool CheckCollisionCars(CarTexture car1, float angle1, CarTexture car2, float an
 	// DrawLineStrip(points2, 5, color);
 	DrawLineStrip(points2_, 9, color);
 	return collided;
+}
+
+SensorStatus CheckSensors(CarTexture car1, float angle1, CarTexture car2, float angle2)
+{
+
+	Rectangle rotatedRec = car1.bodyDestRec;
+	rotatedRec.x = rotatedRec.x - rotatedRec.width / 2;
+	rotatedRec.y = rotatedRec.y - rotatedRec.height / 2;
+	Rectangle rotatedRec2 = car2.bodyDestRec;
+	rotatedRec2.x = rotatedRec2.x - rotatedRec2.width / 2;
+	rotatedRec2.y = rotatedRec2.y - rotatedRec2.height / 2;
+	Color color = RED;
+	Vector2 points1[5] = {0};
+	GenerateCarEdges(car1, &angle1, points1);
+	Vector2 points1_[9] = {0};
+	UltrasonicSensor sensors[8] = {0};
+	GenerateCarEdges_(points1, points1_);
+	GenerateSensorLocations(points1, sensors);
+	// DrawLineStrip(points1, 5, color);
+	// DrawLineStrip(points1_, 9, color);
+	Vector2 points2[5] = {0};
+	Vector2 points2_[9] = {0};
+	GenerateCarEdges(car2, &angle2, points2);
+	GenerateCarEdges_(points2, points2_);
+	Vector2 collisionPoint = {0};
+	Vector2 sensorCollisionPoint = {0};
+	bool collided = false;
+	SensorStatus status = { .hit = false, .sensorHit = {-1}};
+	for (int i = 0; i < 8; i++)
+	{
+		for (int j = 0; j < 8; j++)
+		{
+			if (CheckCollisionLines(points1_[i], points1_[i + 1], points2_[j], points2_[j + 1], &collisionPoint))
+			{
+				collided = true;
+			}
+			if (CheckCollisionLines(sensors[i].location, sensors[i].middleRay, points2_[j], points2_[j + 1], &sensorCollisionPoint))
+			{
+				status.sensorHit[i] = Vector2Distance(sensors[i].location, sensorCollisionPoint);
+				DrawLineV(sensors[i].location, sensorCollisionPoint, RED);
+			}
+		}
+	}
+	status.hit = collided;
+	
+	// DrawLineStrip(points2, 5, color);
+	// DrawLineStrip(points2_, 9, color);
+	return status;
 }
 void GenerateCarEdges_(Vector2 *oldPoints, Vector2 *points)
 {

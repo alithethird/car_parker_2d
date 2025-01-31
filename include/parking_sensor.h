@@ -130,6 +130,6 @@ void GenerateSensorLocations(Vector2 *points, UltrasonicSensor *sensors)
     for (int i = 0; i < 8; i++)
     {
         sensors[i] = RotateSensor(sensors[i]);
-        DrawUltrasonicSensor(sensors[i]);
+        // DrawUltrasonicSensor(sensors[i]);
     }
 }

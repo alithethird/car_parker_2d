@@ -39,7 +39,7 @@ int main()
 	CarTexture carTextureList[CAR_ARRAY_SIZE] = {0};
 	int placeX = 1000;
 	int placeY = 300;
-	int placeXIncrement = 2500;
+	int placeXIncrement = 200;
 	int placeYIncrement = 20;
 	for (int i = 0; i < CAR_ARRAY_SIZE; i++)
 	{
@@ -146,7 +146,11 @@ int main()
 			DrawCar(&carTextureList[i], carRotation, carMovement, wheelRotation, SCALE);
 		}
 		printf("carRotation2:%f\n", carRotation);
-		if (CheckCollisionCars(carTextureList[0], carRotation, carTextureList[1], carRotation))
+		// if (CheckCollisionCars(carTextureList[0], carRotation, carTextureList[1], carRotation))
+		// {
+		// 	DrawText("COLLISION", 200, 200, 200, RED);
+		// }
+		if (CheckSensors(carTextureList[0], carRotation, carTextureList[1], carRotation).hit)
 		{
 			DrawText("COLLISION", 200, 200, 200, RED);
 		}
