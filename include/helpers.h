@@ -4,6 +4,7 @@
 #include "resource_dir.h" // utility header for SearchAndSetResourceDir
 #include <stdio.h>
 #include "parking_sensor.h"
+#include "car_map.h"
 // Image, pixel data stored in CPU memory (RAM)
 typedef struct CarImage
 {
@@ -37,7 +38,6 @@ typedef struct SensorStatus
 	bool hit;
 	float sensorHit[8];
 } SensorStatus;
-
 
 // function to load car with wheels
 CarImage LoadNewCar(const char *carName)
@@ -161,6 +161,22 @@ void RotateCar(CarTexture *carTexture, float carRotation, float carMovement, flo
 	carTexture->leftWheelDestRec.y = carTexture->bodyDestRec.y - cosf(carRotation * DEG2RAD) * (yOriginConstant + carTexture->leftWheelOrigin.y) - sinf(carRotation * DEG2RAD) * (yRotConstant + carTexture->leftWheelOrigin.y);
 }
 
+float MeasureParkDistance(CarTexture carTexture, float carAngle, TargetLocation target){
+	
+	Vector2 points1[5] = {0};
+	GenerateCarEdges(carTexture.bodyDestRec, &carAngle, points1);
+	DrawLineStrip(points1, 5, BLUE);
+	// DrawRectangleRec(carTexture.bodyDestRec, BLUE);	
+	Vector2 targetPoints[5] = {0};
+	Rectangle targetRectangle = {.x = target.x, .y = target.y, .width = carTexture.bodyDestRec.width, .height = carTexture.bodyDestRec.height};
+	GenerateCarEdges(targetRectangle, &target.rotation, targetPoints);
+	DrawLineStrip(targetPoints, 5, BLUE);
+	float totalDistance = 0;
+	for(int i = 0; i < 4; i++){
+		totalDistance += Vector2Distance(points1[i], targetPoints[i]);
+	}
+	return totalDistance;
+}
 CarTexture DrawCar(CarTexture *carTexture, float carRotation, float carMovement, float wheelRotation, float scale)
 {
 	RotateCar(carTexture, carRotation, carMovement, scale);
@@ -192,7 +208,7 @@ bool CheckCollisionCars(CarTexture car1, float angle1, CarTexture car2, float an
 	rotatedRec2.y = rotatedRec2.y - rotatedRec2.height / 2;
 	Color color = RED;
 	Vector2 points1[5] = {0};
-	GenerateCarEdges(car1, &angle1, points1);
+	GenerateCarEdges(car1.bodyDestRec, &angle1, points1);
 	Vector2 points1_[9] = {0};
 	UltrasonicSensor sensors[8] = {0};
 	GenerateCarEdges_(points1, points1_);
@@ -201,7 +217,7 @@ bool CheckCollisionCars(CarTexture car1, float angle1, CarTexture car2, float an
 	DrawLineStrip(points1_, 9, color);
 	Vector2 points2[5] = {0};
 	Vector2 points2_[9] = {0};
-	GenerateCarEdges(car2, &angle2, points2);
+	GenerateCarEdges(car2.bodyDestRec, &angle2, points2);
 	GenerateCarEdges_(points2, points2_);
 	Vector2 collisionPoint = {0};
 	bool collided = false;
@@ -220,7 +236,7 @@ bool CheckCollisionCars(CarTexture car1, float angle1, CarTexture car2, float an
 	return collided;
 }
 
-SensorStatus CheckSensors(CarTexture car1, float angle1, CarTexture car2, float angle2)
+SensorStatus CheckSensors(CarTexture car1, float angle1, CarTexture car2, float angle2, bool debug)
 {
 
 	Rectangle rotatedRec = car1.bodyDestRec;
@@ -231,17 +247,20 @@ SensorStatus CheckSensors(CarTexture car1, float angle1, CarTexture car2, float 
 	rotatedRec2.y = rotatedRec2.y - rotatedRec2.height / 2;
 	Color color = RED;
 	Vector2 points1[5] = {0};
-	GenerateCarEdges(car1, &angle1, points1);
+	GenerateCarEdges(car1.bodyDestRec, &angle1, points1);
 	Vector2 points1_[9] = {0};
 	UltrasonicSensor sensors[8] = {0};
 	GenerateCarEdges_(points1, points1_);
 	GenerateSensorLocations(points1, sensors);
 	// DrawLineStrip(points1, 5, color);
-	// DrawLineStrip(points1_, 9, color);
+	if (debug)
+		DrawLineStrip(points1_, 9, color);
 	Vector2 points2[5] = {0};
 	Vector2 points2_[9] = {0};
-	GenerateCarEdges(car2, &angle2, points2);
+	GenerateCarEdges(car2.bodyDestRec, &angle2, points2);
 	GenerateCarEdges_(points2, points2_);
+	if(debug)
+		DrawLineStrip(points2_, 9, color);
 	Vector2 collisionPoint = {0};
 	Vector2 sensorCollisionPoint = {0};
 	bool collided = false;
@@ -256,7 +275,7 @@ SensorStatus CheckSensors(CarTexture car1, float angle1, CarTexture car2, float 
 			}
 			if (CheckCollisionLines(sensors[i].location, sensors[i].middleRay, points2_[j], points2_[j + 1], &sensorCollisionPoint))
 			{
-				status.sensorHit[i] = Vector2Distance(sensors[i].location, sensorCollisionPoint);
+				status.sensorHit[i] = Vector2Distance(sensors[i].location, sensorCollisionPoint) / Vector2Distance(sensors[i].location, sensors[i].middleRay);
 				DrawLineV(sensors[i].location, sensorCollisionPoint, RED);
 			}
 		}
@@ -288,9 +307,9 @@ void GenerateCarEdges_(Vector2 *oldPoints, Vector2 *points)
 }
 
 
-void GenerateCarEdges(CarTexture car, float *angle, Vector2 *points)
+void GenerateCarEdges(Rectangle carRectangle, float *angle, Vector2 *points)
 {
-	Rectangle rotatedRec = car.bodyDestRec;
+	Rectangle rotatedRec = carRectangle;
 	rotatedRec.x = rotatedRec.x - rotatedRec.width / 2;
 	rotatedRec.y = rotatedRec.y - rotatedRec.height / 2;
 

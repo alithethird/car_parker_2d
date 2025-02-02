@@ -1,0 +1,7 @@
+{
+    "car1": {"x": 300, "y": 200, "scale": 0.4, "name": "insignia_yellow.png"},
+    "car2": {"x": 500, "y": 200, "scale": 0.4, "name": "insignia_green.png"},
+    "car3": {"x": 700, "y": 200, "scale": 0.4, "name": "insignia_pink.png"},
+    "car4": {"x": 900, "y": 200, "scale": 0.4, "name": "insignia_red.png"},
+    "target": {"x": 1100, "y": 200, "scale": 0.4, "rotation": 0}
+}
