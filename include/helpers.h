@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include "parking_sensor.h"
 #include "car_map.h"
+#include "car_history.h"
 // Image, pixel data stored in CPU memory (RAM)
 typedef struct CarImage
 {

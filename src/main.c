@@ -59,7 +59,16 @@ int main()
 
 	// Utility function from resource_dir.h to find the resources folder and set it as the current working directory so we can load from it
 	SearchAndSetResourceDir("resources");
+    int arr_size = 2;
+	CarHistory *h; 
+	parseHistory("history_1.json", &arr_size, h);
+	for (int i = 0; i < arr_size; i++)
+	{
+		// PrintCarHistory(h[i]);
+	}
 	CarMap map = parseMap("map1.json");
+	// PrintCarMap(map);
+	exit(1);
 	CarImage *carNewImageList = (CarImage *)malloc(sizeof(CarImage) * map.count);
 	Vector2 *placeList = (Vector2 *)malloc(sizeof(Vector2) * map.count); //{(float)screenWidth / 2, (float)screenHeight / 2}; //{0,0};//
 	CarTexture *carTextureList = (CarTexture *)malloc(sizeof(CarTexture) * map.count);
@@ -115,7 +124,7 @@ int main()
 				* float rotationMovement
 				* float wheelRotation
 				* float carRotation
-		
+
 		outputs:
 			- float wheelRotationSpeed
 			- float carRotationSpeed
@@ -127,10 +136,10 @@ int main()
 			DrawCar(&carTextureList[i], 0, 0, 0, map.carList[i].scale);
 			col = (CheckSensors(carTextureList[0], carDrive.carRotation, carTextureList[i], 0, false).hit) ? true : col;
 		}
-			targetDistance = MeasureParkDistance(carTextureList[0], carDrive.carRotation, map.target);
-		char* distance[20];
+		targetDistance = MeasureParkDistance(carTextureList[0], carDrive.carRotation, map.target);
+		char *distance[20];
 		sprintf(distance, "%.4f", targetDistance);
-			DrawText(distance, 200, 600, 200, RED);
+		DrawText(distance, 200, 600, 200, RED);
 		if (col)
 			DrawText("COLLISION", 200, 200, 200, RED);
 		EndDrawing();

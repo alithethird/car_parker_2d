@@ -46,25 +46,6 @@ void PrintCarMap(CarMap carMap)
     }
 }
 
-static int jsoneq(const char *json, jsmntok_t *tok, const char *s)
-{
-    if (tok->type == JSMN_STRING && (int)strlen(s) == tok->end - tok->start &&
-        strncmp(json + tok->start, s, tok->end - tok->start) == 0)
-    {
-        return 0;
-    }
-    return -1;
-}
-
-static int jsonStartWith(const char *json, jsmntok_t *tok, const char *s)
-{
-    if (tok->type == JSMN_STRING && (int)strlen(s) <= tok->end - tok->start &&
-        strncmp(json + tok->start, s, (int)strlen(s)) == 0)
-    {
-        return 0;
-    }
-    return -1;
-}
 
 
 // static const char *JSON_STRING =
@@ -107,8 +88,9 @@ CarMap parseMap(const char *mapLocation)
     }
     CarLocation *carLocations;
     TargetLocation target;
-    carLocations = malloc(4 * sizeof(CarLocation));
-    CarMap carMap = {0, .mapLocation = mapLocation, .carList = carLocations, .count = 4, .target=target};
+    int arr_size = 4;
+    carLocations = malloc(arr_size * sizeof(CarLocation));
+    CarMap carMap = {0, .mapLocation = mapLocation, .carList = carLocations, .count = arr_size, .target=target};
     strcpy(carMap.mapLocation, mapLocation);
     int carIndex = 0;
     char carName[20] = {'\0'};
@@ -122,6 +104,16 @@ CarMap parseMap(const char *mapLocation)
     {
         if (jsonStartWith(JSON_STRING, &t[i], "car") == 0)
         {
+        if (carIndex >= arr_size)
+        {
+            arr_size++;
+            CarLocation *newcarLocations = (CarLocation*)malloc(arr_size * sizeof(CarLocation));
+            for(int k = 0; k < carIndex; k++){
+                newcarLocations[k] = carLocations[k];
+            }
+            free(carLocations);
+            carLocations = newcarLocations;
+        }
             int j;
             jsmntok_t *g = &t[i];
             sprintf(carName, "%.*s", g->end - g->start, JSON_STRING + g->start);
@@ -168,6 +160,7 @@ CarMap parseMap(const char *mapLocation)
             strcpy(tempCar.carFile, tempFile);
             strcpy(tempCar.carName, tempName);
             carLocations[carIndex] = tempCar;
+            carMap.count = carIndex;
             carIndex++;
         }
         else if (jsonStartWith(JSON_STRING, &t[i], "target") == 0)
